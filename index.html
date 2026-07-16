@@ -8,6 +8,7 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
         <link rel="stylesheet" href="css/qgis2web.css">
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
@@ -35,6 +36,7 @@
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
         <script src="js/leaflet.rotatedMarker.js"></script>
         <script src="js/leaflet.pattern.js"></script>
         <script src="js/leaflet-hash.js"></script>
@@ -47,9 +49,14 @@
         <script src="data/KabPasuruan_1.js"></script>
         <script src="data/FasilitasKesehatan_2.js"></script>
         <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+            highlightLayer.openPopup();
+        }
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
-        }).fitBounds([[-8.021360022238301,112.11430846382116],[-7.4343587211215265,113.4131484468352]]);
+        })
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/qgis2web/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
@@ -159,6 +166,7 @@
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
         var measureControl = new L.Control.Measure({
             position: 'topleft',
             primaryLengthUnit: 'meters',
@@ -171,6 +179,9 @@
         document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
         var bounds_group = new L.featureGroup([]);
         function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
         }
         map.createPane('pane_GoogleSatellite_0');
         map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
@@ -186,6 +197,18 @@
         layer_GoogleSatellite_0;
         map.addLayer(layer_GoogleSatellite_0);
         function pop_KabPasuruan_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
             var popupContent = '<table>\
                     <tr>\
                         <th scope="row">WADMKC</th>\
@@ -602,6 +625,18 @@
         bounds_group.addLayer(layer_KabPasuruan_1);
         map.addLayer(layer_KabPasuruan_1);
         function pop_FasilitasKesehatan_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
             var popupContent = '<table>\
                     <tr>\
                         <th scope="row">id</th>\
@@ -667,6 +702,20 @@
         });
         bounds_group.addLayer(layer_FasilitasKesehatan_2);
         map.addLayer(layer_FasilitasKesehatan_2);
+        var overlaysTree = [
+            {label: '<img src="legend/FasilitasKesehatan_2.png" /> Fasilitas Kesehatan', layer: layer_FasilitasKesehatan_2},
+            {label: 'Kab Pasuruan<br /><table><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Bangil0.png" /></td><td>Bangil</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Beji1.png" /></td><td>Beji</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Gempol2.png" /></td><td>Gempol</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Gondangwetan3.png" /></td><td>Gondangwetan</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Grati4.png" /></td><td>Grati</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Kejayan5.png" /></td><td>Kejayan</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Kraton6.png" /></td><td>Kraton</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Lekok7.png" /></td><td>Lekok</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Lumbang8.png" /></td><td>Lumbang</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Nguling9.png" /></td><td>Nguling</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Pandaan10.png" /></td><td>Pandaan</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Pasrepan11.png" /></td><td>Pasrepan</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Pohjentrek12.png" /></td><td>Pohjentrek</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Prigen13.png" /></td><td>Prigen</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Purwodadi14.png" /></td><td>Purwodadi</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Purwosari15.png" /></td><td>Purwosari</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Puspo16.png" /></td><td>Puspo</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Rejoso17.png" /></td><td>Rejoso</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Rembang18.png" /></td><td>Rembang</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Sukorejo19.png" /></td><td>Sukorejo</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Tosari20.png" /></td><td>Tosari</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Tutur21.png" /></td><td>Tutur</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Winongan22.png" /></td><td>Winongan</td></tr><tr><td style="text-align: center;"><img src="legend/KabPasuruan_1_Wonorejo23.png" /></td><td>Wonorejo</td></tr></table>', layer: layer_KabPasuruan_1},
+            {label: "Google Satellite", layer: layer_GoogleSatellite_0, radioGroup: 'bm' },]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
         setBounds();
         var i = 0;
         layer_KabPasuruan_1.eachLayer(function(layer) {
